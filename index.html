@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Stylish Text</title>
+    <title>Interactive Text</title>
     <style>
         * {
             margin: 0;
@@ -17,6 +17,7 @@
             align-items: center;
             min-height: 100vh;
             background: #121212;
+            overflow: hidden;
         }
 
         .moving-text {
@@ -26,31 +27,39 @@
             font-family: 'Oswald', sans-serif;
             text-transform: uppercase;
             letter-spacing: 5px;
-            animation: moveText 5s linear infinite, changeColor 5s linear infinite alternate;
+            position: absolute;
+            transition: transform 0.3s ease-in-out;
         }
 
-        @keyframes moveText {
-            0% {
-                transform: translateX(0);
-            }
-            100% {
-                transform: translateX(calc(100% - 200px));
-            }
-        }
-
-        @keyframes changeColor {
-            0% {
-                color: #1ae907;
-            }
-            100% {
-                color: #e9071a;
-            }
+        .moving-text:hover {
+            transform: translateX(200px);
         }
     </style>
 </head>
 
 <body>
     <div class="moving-text">amir hossain</div>
+    <script>
+        const movingText = document.querySelector('.moving-text');
+        movingText.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            const initialX = e.clientX;
+            const initialTransform = getComputedStyle(movingText).transform;
+
+            function onMouseMove(e) {
+                const deltaX = e.clientX - initialX;
+                movingText.style.transform = `${initialTransform} translateX(${deltaX}px)`;
+            }
+
+            function onMouseUp() {
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+
+            document.addEventListener('mousemove', onMouseMove);
+            document.addEventListener('mouseup', onMouseUp);
+        });
+    </script>
 </body>
 
 </html>
